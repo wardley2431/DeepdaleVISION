@@ -141,6 +141,16 @@ function createRoom() {
   });
 }
 
+function screenCaptureSupportMessage() {
+  if (!window.isSecureContext) {
+    return "Screen sharing requires HTTPS or localhost. Open the host page on localhost, or set up HTTPS for the Pi.";
+  }
+  if (!navigator.mediaDevices?.getDisplayMedia) {
+    return "This browser does not support screen sharing here. Use a recent Chrome, Edge, or Firefox browser.";
+  }
+  return "";
+}
+
 function saveSession(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
@@ -213,6 +223,12 @@ function setHostSharing(sharing, track = null) {
 }
 
 async function startSharing() {
+  const supportMessage = screenCaptureSupportMessage();
+  if (supportMessage) {
+    showToast(supportMessage);
+    return;
+  }
+
   setButtonBusy(shareButton, true, "Opening screen picker...");
   try {
     if (!state.room || state.room.state !== "connected") {

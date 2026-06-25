@@ -79,6 +79,11 @@ The teacher should open the host page on the Pi itself at
 machine. Browsers block screen sharing on ordinary LAN HTTP addresses because
 screen capture requires a secure context.
 
+Important: if the teacher opens `http://PI_LAN_IP:8080/host` from another
+computer, the page can connect to LiveKit but the browser will not allow screen
+sharing. Use `localhost` on the machine doing the sharing, or serve the host page
+over HTTPS with a trusted certificate.
+
 Useful Pi commands:
 
 ```bash
