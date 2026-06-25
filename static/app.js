@@ -228,7 +228,7 @@ async function createHostSession(event) {
     });
     state.role = "host";
     state.hostSession = session;
-    saveSession("classcast.host", session);
+    saveSession("deepdalevision.host", session);
     hostPin.textContent = formatPin(session.pin);
     viewerLimit.textContent = String(session.maxViewers);
     showView("host");
@@ -307,7 +307,7 @@ async function joinViewerSession(event) {
     });
     state.role = "viewer";
     state.viewerSession = session;
-    saveSession("classcast.viewer", session);
+    saveSession("deepdalevision.viewer", session);
     viewerPin.textContent = formatPin(pin);
     showView("viewer");
     history.replaceState(null, "", `#join=${pin}`);
@@ -357,7 +357,7 @@ async function endHostSession() {
     showToast(error.message);
   } finally {
     await state.room?.disconnect();
-    clearSession("classcast.host");
+    clearSession("deepdalevision.host");
     state.hostSession = null;
     state.room = null;
     state.ending = false;
@@ -378,7 +378,7 @@ async function leaveViewer() {
   };
   await api("/api/viewers/leave", { method: "POST", body }).catch(() => {});
   await state.room?.disconnect();
-  clearSession("classcast.viewer");
+  clearSession("deepdalevision.viewer");
   state.viewerSession = null;
   state.room = null;
   state.ending = false;
@@ -389,7 +389,7 @@ async function leaveViewer() {
 async function resumeFromHash() {
   const hash = window.location.hash;
   if (hash === "#host") {
-    const session = loadSession("classcast.host");
+    const session = loadSession("deepdalevision.host");
     if (!session) {
       history.replaceState(null, "", window.location.pathname);
       return;
@@ -402,7 +402,7 @@ async function resumeFromHash() {
     try {
       await connectHost(session);
     } catch (error) {
-      clearSession("classcast.host");
+      clearSession("deepdalevision.host");
       showToast(error.message);
       showView("landing");
     }
@@ -410,7 +410,7 @@ async function resumeFromHash() {
   }
   if (hash.startsWith("#join=")) {
     const pin = normalizePin(hash.slice(6));
-    const session = loadSession("classcast.viewer");
+    const session = loadSession("deepdalevision.viewer");
     pinInput.value = formatPin(pin);
     if (
       session

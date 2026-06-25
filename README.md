@@ -1,6 +1,6 @@
-# ClassCast
+# DeepdaleVISION
 
-ClassCast is a standalone, one-way classroom screen-sharing application. A
+DeepdaleVISION is a standalone, one-way classroom screen-sharing application. A
 teacher creates a temporary six-digit PIN and publishes one browser screen
 track. Up to 12 students enter the PIN and watch without publishing camera,
 microphone, or screen data.
@@ -47,7 +47,7 @@ On the Pi, install Docker and the Compose plugin first. Then clone or pull this
 repository and start the stack:
 
 ```bash
-cd ~/classcast-screen-share
+cd ~/DeepdaleVISION
 cp .env.example .env
 nano .env
 docker compose up --build -d
@@ -89,8 +89,8 @@ For a closed network with no internet access, load the Docker images onto the Pi
 before running Compose:
 
 ```bash
-docker save python:3.13-slim livekit/livekit-server:v1.12.0 -o classcast-images.tar
-docker load -i classcast-images.tar
+docker save python:3.13-slim livekit/livekit-server:v1.12.0 -o deepdalevision-images.tar
+docker load -i deepdalevision-images.tar
 ```
 
 ## Classroom LAN

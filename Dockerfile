@@ -10,10 +10,10 @@ WORKDIR /app
 COPY server.py ./
 COPY static ./static
 
-RUN useradd --create-home --shell /usr/sbin/nologin classcast \
-    && chown -R classcast:classcast /app
+RUN useradd --create-home --shell /usr/sbin/nologin deepdalevision \
+    && chown -R deepdalevision:deepdalevision /app
 
-USER classcast
+USER deepdalevision
 
 EXPOSE 8080
 

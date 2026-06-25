@@ -89,7 +89,7 @@ class RoomStore:
             pin = self._new_pin_locked()
             room = RoomSession(
                 pin=pin,
-                room_name=f"classcast-{pin}-{uuid.uuid4().hex[:8]}",
+                room_name=f"deepdalevision-{pin}-{uuid.uuid4().hex[:8]}",
                 host_key=secrets.token_urlsafe(32),
                 host_name=clean_name(host_name, "Teacher"),
                 created_at=now,
@@ -480,7 +480,7 @@ def main() -> None:
     host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("APP_PORT", "8080"))
     server = ScreenShareServer((host, port))
-    print(f"ClassCast listening on http://{host}:{port}")
+    print(f"DeepdaleVISION listening on http://{host}:{port}")
     print(f"LiveKit URL: {server.config.livekit_url}")
     try:
         server.serve_forever()

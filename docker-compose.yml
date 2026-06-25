@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: classcast-app
+    container_name: deepdalevision-app
     restart: unless-stopped
     depends_on:
       - livekit
@@ -17,7 +17,7 @@ services:
 
   livekit:
     image: livekit/livekit-server:v1.12.0
-    container_name: classcast-livekit
+    container_name: deepdalevision-livekit
     restart: unless-stopped
     command:
       - --node-ip
