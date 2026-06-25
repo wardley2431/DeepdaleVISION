@@ -6,7 +6,15 @@ const views = {
 
 const hostForm = document.querySelector("#hostForm");
 const joinForm = document.querySelector("#joinForm");
+const actionGrid = document.querySelector("#actionGrid");
+const hostCard = document.querySelector("#hostCard");
+const joinCard = document.querySelector("#joinCard");
+const heroEyebrow = document.querySelector("#heroEyebrow");
+const heroTitle = document.querySelector("#heroTitle");
+const heroText = document.querySelector("#heroText");
 const hostNameInput = document.querySelector("#hostName");
+const hostCodeField = document.querySelector("#hostCodeField");
+const hostCodeInput = document.querySelector("#hostCode");
 const studentNameInput = document.querySelector("#studentName");
 const pinInput = document.querySelector("#pinInput");
 const hostPin = document.querySelector("#hostPin");
@@ -39,6 +47,34 @@ const state = {
   statusTimer: null,
   ending: false,
 };
+
+function routeName() {
+  const path = window.location.pathname.replace(/\/+$/, "");
+  return path === "/host" ? "host" : "viewer";
+}
+
+function configureLanding() {
+  const isHostPage = routeName() === "host";
+  document.body.dataset.page = isHostPage ? "host" : "viewer";
+  actionGrid.classList.add("single-card");
+  hostCard.classList.toggle("hidden", !isHostPage);
+  joinCard.classList.toggle("hidden", isHostPage);
+
+  if (isHostPage) {
+    heroEyebrow.textContent = "Teacher host page";
+    heroTitle.textContent = "Start a private screen-share session.";
+    heroText.textContent = "Create a PIN here, then give students only the viewer page address and session PIN.";
+  } else {
+    heroEyebrow.textContent = "Student viewer page";
+    heroTitle.textContent = "Join your teacher's shared screen.";
+    heroText.textContent = "Enter the six-digit PIN from your teacher. This page cannot create or host sessions.";
+  }
+
+  const codeRequired = Boolean(state.config?.hostCodeRequired);
+  hostCodeField.classList.toggle("hidden", !codeRequired);
+  hostCodeInput.classList.toggle("hidden", !codeRequired);
+  hostCodeInput.required = codeRequired;
+}
 
 function showView(name) {
   Object.entries(views).forEach(([key, element]) => {
@@ -219,12 +255,22 @@ async function stopSharing() {
 
 async function createHostSession(event) {
   event.preventDefault();
+  if (routeName() !== "host") {
+    showToast("Open the teacher host page to create a session.");
+    history.replaceState(null, "", "/host");
+    configureLanding();
+    return;
+  }
+  if (state.config.hostCodeRequired && !hostCodeInput.value.trim()) {
+    showToast("Enter the host access code.");
+    return;
+  }
   const submit = hostForm.querySelector("button[type='submit']");
   setButtonBusy(submit, true, "Creating...");
   try {
     const session = await api("/api/rooms", {
       method: "POST",
-      body: { name: hostNameInput.value },
+      body: { name: hostNameInput.value, hostCode: hostCodeInput.value },
     });
     state.role = "host";
     state.hostSession = session;
@@ -232,7 +278,7 @@ async function createHostSession(event) {
     hostPin.textContent = formatPin(session.pin);
     viewerLimit.textContent = String(session.maxViewers);
     showView("host");
-    history.replaceState(null, "", "#host");
+    history.replaceState(null, "", "/host#host");
     await connectHost(session);
   } catch (error) {
     showToast(error.message);
@@ -310,7 +356,7 @@ async function joinViewerSession(event) {
     saveSession("deepdalevision.viewer", session);
     viewerPin.textContent = formatPin(pin);
     showView("viewer");
-    history.replaceState(null, "", `#join=${pin}`);
+    history.replaceState(null, "", `/viewer#join=${pin}`);
     await connectViewer(session);
   } catch (error) {
     showToast(error.message);
@@ -361,7 +407,8 @@ async function endHostSession() {
     state.hostSession = null;
     state.room = null;
     state.ending = false;
-    history.replaceState(null, "", window.location.pathname);
+    history.replaceState(null, "", "/host");
+    configureLanding();
     showView("landing");
   }
 }
@@ -382,16 +429,17 @@ async function leaveViewer() {
   state.viewerSession = null;
   state.room = null;
   state.ending = false;
-  history.replaceState(null, "", window.location.pathname);
+  history.replaceState(null, "", "/viewer");
+  configureLanding();
   showView("landing");
 }
 
 async function resumeFromHash() {
   const hash = window.location.hash;
-  if (hash === "#host") {
+  if (hash === "#host" && routeName() === "host") {
     const session = loadSession("deepdalevision.host");
     if (!session) {
-      history.replaceState(null, "", window.location.pathname);
+      history.replaceState(null, "", "/host");
       return;
     }
     state.role = "host";
@@ -408,7 +456,7 @@ async function resumeFromHash() {
     }
     return;
   }
-  if (hash.startsWith("#join=")) {
+  if (hash.startsWith("#join=") && routeName() !== "host") {
     const pin = normalizePin(hash.slice(6));
     const session = loadSession("deepdalevision.viewer");
     pinInput.value = formatPin(pin);
@@ -447,6 +495,7 @@ copyPinButton.addEventListener("click", async () => {
 async function boot() {
   state.config = await api("/api/config");
   viewerLimit.textContent = String(state.config.maxViewers);
+  configureLanding();
   await resumeFromHash();
 }
 

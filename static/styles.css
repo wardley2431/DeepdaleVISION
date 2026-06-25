@@ -197,6 +197,11 @@ h2 {
   gap: 18px;
 }
 
+.action-grid.single-card {
+  grid-template-columns: minmax(320px, 520px);
+  justify-content: end;
+}
+
 .action-card {
   position: relative;
   min-height: 510px;

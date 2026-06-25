@@ -29,6 +29,7 @@ class AppConfig:
     api_key: str
     api_secret: str
     livekit_url: str
+    host_access_code: str = ""
     max_viewers: int = 12
     room_ttl_seconds: int = 4 * 60 * 60
     viewer_ttl_seconds: int = 45
@@ -43,6 +44,7 @@ class AppConfig:
                 "devsecretdevsecretdevsecretdevsecret",
             ),
             livekit_url=os.getenv("LIVEKIT_URL", "auto"),
+            host_access_code=os.getenv("HOST_ACCESS_CODE", "").strip(),
             max_viewers=int(os.getenv("MAX_VIEWERS", "12")),
             room_ttl_seconds=int(os.getenv("ROOM_TTL_SECONDS", str(4 * 60 * 60))),
             viewer_ttl_seconds=int(os.getenv("VIEWER_TTL_SECONDS", "45")),
@@ -82,9 +84,14 @@ class RoomStore:
         self._rooms: dict[str, RoomSession] = {}
         self._lock = threading.RLock()
 
-    def create_room(self, host_name: str) -> RoomSession:
+    def create_room(self, host_name: str, host_code: str = "") -> RoomSession:
         now = time.time()
         with self._lock:
+            if self.config.host_access_code and not secrets.compare_digest(
+                str(host_code),
+                self.config.host_access_code,
+            ):
+                raise ApiError(HTTPStatus.FORBIDDEN, "Host access code is incorrect.")
             self._cleanup_locked(now)
             pin = self._new_pin_locked()
             room = RoomSession(
@@ -293,6 +300,7 @@ class AppHandler(BaseHTTPRequestHandler):
                 {
                     "livekitUrl": self.server.config.livekit_url,
                     "maxViewers": self.server.config.max_viewers,
+                    "hostCodeRequired": bool(self.server.config.host_access_code),
                 },
             )
             return
@@ -313,7 +321,10 @@ class AppHandler(BaseHTTPRequestHandler):
         try:
             payload = self.read_json()
             if path == "/api/rooms":
-                room = self.server.store.create_room(payload.get("name", "Teacher"))
+                room = self.server.store.create_room(
+                    payload.get("name", "Teacher"),
+                    str(payload.get("hostCode", "")),
+                )
                 self.send_json(
                     HTTPStatus.CREATED,
                     {
@@ -417,7 +428,11 @@ class AppHandler(BaseHTTPRequestHandler):
         return payload
 
     def serve_static(self, path: str) -> None:
-        relative_path = "index.html" if path in {"", "/"} else path.lstrip("/")
+        relative_path = (
+            "index.html"
+            if path in {"", "/", "/host", "/viewer"}
+            else path.lstrip("/")
+        )
         candidate = (STATIC_DIR / relative_path).resolve()
         try:
             candidate.relative_to(STATIC_DIR.resolve())

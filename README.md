@@ -11,6 +11,8 @@ as the SFU, so the teacher uploads one stream rather than one stream per student
 ## What Is Included
 
 - Six-digit temporary room PINs
+- Separate `/host` and `/viewer` pages
+- Optional host access code enforced by the backend
 - Private host keys that never appear in the URL
 - Viewer-only LiveKit access tokens
 - A 12-viewer admission limit
@@ -35,11 +37,12 @@ docker compose up --build
 Open:
 
 ```text
-http://localhost:8080
+Teacher: http://localhost:8080/host
+Student: http://localhost:8080/viewer
 ```
 
-The teacher can create a room in one browser window and join it in a second
-window using the displayed PIN.
+Set `HOST_ACCESS_CODE` in `.env` before class. The teacher enters that code on
+the host page; the viewer page cannot create sessions.
 
 ## Raspberry Pi Quick Start
 
@@ -68,11 +71,11 @@ hostname -I
 Students open:
 
 ```text
-http://PI_LAN_IP:8080
+http://PI_LAN_IP:8080/viewer
 ```
 
 The teacher should open the host page on the Pi itself at
-`http://localhost:8080`, or use HTTPS if the teacher is sharing from another
+`http://localhost:8080/host`, or use HTTPS if the teacher is sharing from another
 machine. Browsers block screen sharing on ordinary LAN HTTP addresses because
 screen capture requires a secure context.
 
@@ -104,10 +107,10 @@ LIVEKIT_NODE_IP=192.168.1.50
 Students then open:
 
 ```text
-http://192.168.1.50:8080
+http://192.168.1.50:8080/viewer
 ```
 
-The teacher should open `http://localhost:8080` on the Docker host. Browsers
+The teacher should open `http://localhost:8080/host` on the Docker host. Browsers
 allow screen capture on localhost, but screen capture from a normal LAN HTTP
 address is blocked because `getDisplayMedia()` requires a secure context.
 
@@ -148,7 +151,7 @@ This starts the PIN/token web server only; LiveKit must already be running:
 .\start.ps1
 ```
 
-Then open `http://127.0.0.1:8080`.
+Then open `http://127.0.0.1:8080/host` or `http://127.0.0.1:8080/viewer`.
 
 ## Tests
 

@@ -8,7 +8,7 @@ import unittest
 import urllib.error
 import urllib.request
 
-from server import AppConfig, RoomStore, ScreenShareServer, create_access_token
+from server import ApiError, AppConfig, RoomStore, ScreenShareServer, create_access_token
 
 
 def decode_segment(segment: str) -> dict:
@@ -33,6 +33,20 @@ class RoomStoreTests(unittest.TestCase):
         room = self.store.create_room("Ms Test")
         self.assertRegex(room.pin, r"^\d{6}$")
         self.assertEqual(self.store.authenticate_host(room.pin, room.host_key), room)
+
+    def test_host_code_required_when_configured(self) -> None:
+        config = AppConfig(
+            api_key="test-key",
+            api_secret="test-secret-that-is-long-enough",
+            livekit_url="ws://localhost:7880",
+            host_access_code="teacher-only",
+        )
+        store = RoomStore(config)
+        with self.assertRaises(ApiError):
+            store.create_room("Teacher", "wrong-code")
+
+        room = store.create_room("Teacher", "teacher-only")
+        self.assertRegex(room.pin, r"^\d{6}$")
 
     def test_viewer_limit_and_expiry(self) -> None:
         room = self.store.create_room("Teacher")
@@ -99,6 +113,20 @@ class HttpApiTests(unittest.TestCase):
                 return response.status, json.loads(response.read())
         except urllib.error.HTTPError as error:
             return error.code, json.loads(error.read())
+
+    def get_text(self, path: str) -> tuple[int, str]:
+        request = urllib.request.Request(self.base_url + path)
+        try:
+            with urllib.request.urlopen(request, timeout=2) as response:
+                return response.status, response.read().decode()
+        except urllib.error.HTTPError as error:
+            return error.code, error.read().decode()
+
+    def test_host_and_viewer_routes_serve_app_shell(self) -> None:
+        for path in ("/host", "/viewer"):
+            status, text = self.get_text(path)
+            self.assertEqual(status, 200)
+            self.assertIn("DeepdaleVISION Screen Sharing", text)
 
     def test_create_join_heartbeat_and_end(self) -> None:
         status, room = self.request("/api/rooms", {"name": "Teacher"})

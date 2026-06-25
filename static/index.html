@@ -9,7 +9,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="DeepdaleVISION home">
+      <a class="brand" href="/viewer" aria-label="DeepdaleVISION home">
         <span class="brand-mark" aria-hidden="true">
           <span></span><span></span><span></span>
         </span>
@@ -24,9 +24,9 @@
     <main>
       <section id="landingView" class="view landing">
         <div class="hero-copy">
-          <p class="eyebrow">Built for a room, not a conference</p>
-          <h1>Share one screen with the whole class.</h1>
-          <p class="hero-text">
+          <p id="heroEyebrow" class="eyebrow">Built for a room, not a conference</p>
+          <h1 id="heroTitle">Share one screen with the whole class.</h1>
+          <p id="heroText" class="hero-text">
             Create a temporary session, show the six-digit PIN, and let up to
             12 students watch from their browsers.
           </p>
@@ -37,8 +37,8 @@
           </div>
         </div>
 
-        <div class="action-grid">
-          <article class="action-card host-card">
+        <div id="actionGrid" class="action-grid">
+          <article id="hostCard" class="action-card host-card">
             <div class="card-number">01</div>
             <p class="eyebrow">Teacher</p>
             <h2>Start a session</h2>
@@ -46,12 +46,21 @@
             <form id="hostForm">
               <label for="hostName">Display name</label>
               <input id="hostName" name="hostName" maxlength="40" value="Teacher" autocomplete="name">
+              <label id="hostCodeField" class="hidden" for="hostCode">Host access code</label>
+              <input
+                id="hostCode"
+                class="hidden"
+                name="hostCode"
+                type="password"
+                maxlength="80"
+                autocomplete="current-password"
+              >
               <button class="button primary" type="submit">Create session</button>
             </form>
           </article>
 
-          <article class="action-card join-card">
-            <div class="card-number">02</div>
+          <article id="joinCard" class="action-card join-card">
+            <div class="card-number">01</div>
             <p class="eyebrow">Student</p>
             <h2>Join with a PIN</h2>
             <p>Enter the number shown by your teacher. Nothing is published from your device.</p>
@@ -118,7 +127,7 @@
             <div id="hostPlaceholder" class="video-placeholder">
               <div class="screen-icon" aria-hidden="true"></div>
               <strong>Nothing is being shared yet</strong>
-              <span>Select “Share screen” when your students are ready.</span>
+              <span>Select "Share screen" when your students are ready.</span>
             </div>
           </div>
         </div>
