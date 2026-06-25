@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#11221d">
+    <title>ClassCast Screen Sharing</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ClassCast home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>
+          <strong>ClassCast</strong>
+          <small>One-way classroom screen sharing</small>
+        </span>
+      </a>
+      <span class="privacy-note">No camera. No microphone. No recording.</span>
+    </header>
+
+    <main>
+      <section id="landingView" class="view landing">
+        <div class="hero-copy">
+          <p class="eyebrow">Built for a room, not a conference</p>
+          <h1>Share one screen with the whole class.</h1>
+          <p class="hero-text">
+            Create a temporary session, show the six-digit PIN, and let up to
+            12 students watch from their browsers.
+          </p>
+          <div class="feature-row" aria-label="Key features">
+            <span>720p classroom stream</span>
+            <span>Viewer-only students</span>
+            <span>Sessions expire automatically</span>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <article class="action-card host-card">
+            <div class="card-number">01</div>
+            <p class="eyebrow">Teacher</p>
+            <h2>Start a session</h2>
+            <p>Create a fresh PIN, then choose the tab, window, or screen to share.</p>
+            <form id="hostForm">
+              <label for="hostName">Display name</label>
+              <input id="hostName" name="hostName" maxlength="40" value="Teacher" autocomplete="name">
+              <button class="button primary" type="submit">Create session</button>
+            </form>
+          </article>
+
+          <article class="action-card join-card">
+            <div class="card-number">02</div>
+            <p class="eyebrow">Student</p>
+            <h2>Join with a PIN</h2>
+            <p>Enter the number shown by your teacher. Nothing is published from your device.</p>
+            <form id="joinForm">
+              <label for="studentName">Display name</label>
+              <input id="studentName" name="studentName" maxlength="40" placeholder="Student" autocomplete="name">
+              <label for="pinInput">Session PIN</label>
+              <input
+                id="pinInput"
+                name="pin"
+                class="pin-input"
+                inputmode="numeric"
+                pattern="[0-9 ]{6,7}"
+                maxlength="7"
+                placeholder="000 000"
+                autocomplete="one-time-code"
+                required
+              >
+              <button class="button secondary" type="submit">Join session</button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section id="hostView" class="view session-view hidden" aria-labelledby="hostTitle">
+        <div class="session-sidebar">
+          <p class="eyebrow">Teacher console</p>
+          <h1 id="hostTitle">Your class is ready</h1>
+          <p class="muted">Students join at this address using:</p>
+          <div class="pin-panel">
+            <span>Session PIN</span>
+            <strong id="hostPin">------</strong>
+            <button id="copyPinButton" class="text-button" type="button">Copy PIN</button>
+          </div>
+          <div class="session-stat">
+            <span>Viewers</span>
+            <strong><span id="viewerCount">0</span> / <span id="viewerLimit">12</span></strong>
+          </div>
+          <div class="session-stat">
+            <span>Connection</span>
+            <strong id="hostConnection">Connecting...</strong>
+          </div>
+          <div class="button-stack">
+            <button id="shareButton" class="button primary" type="button">Share screen</button>
+            <button id="stopShareButton" class="button secondary hidden" type="button">Stop sharing</button>
+            <button id="endSessionButton" class="text-button danger" type="button">End session</button>
+          </div>
+          <p class="fine-print">
+            Your browser will always ask which screen to share. ClassCast never
+            requests microphone or camera access.
+          </p>
+        </div>
+
+        <div class="stage">
+          <div class="stage-heading">
+            <div>
+              <p class="eyebrow">Teacher preview</p>
+              <h2>Shared screen</h2>
+            </div>
+            <span id="hostLiveBadge" class="live-badge idle">Not sharing</span>
+          </div>
+          <div class="video-shell">
+            <video id="hostVideo" autoplay muted playsinline></video>
+            <div id="hostPlaceholder" class="video-placeholder">
+              <div class="screen-icon" aria-hidden="true"></div>
+              <strong>Nothing is being shared yet</strong>
+              <span>Select “Share screen” when your students are ready.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="viewerView" class="view session-view viewer-layout hidden" aria-labelledby="viewerTitle">
+        <div class="viewer-topbar">
+          <div>
+            <p class="eyebrow">Student view</p>
+            <h1 id="viewerTitle">Class screen</h1>
+          </div>
+          <div class="viewer-meta">
+            <span>PIN <strong id="viewerPin">------</strong></span>
+            <span id="viewerConnection">Connecting...</span>
+            <button id="leaveButton" class="text-button" type="button">Leave</button>
+          </div>
+        </div>
+        <div class="stage viewer-stage">
+          <div class="video-shell viewer-video-shell">
+            <video id="viewerVideo" autoplay playsinline></video>
+            <div id="viewerPlaceholder" class="video-placeholder">
+              <div class="pulse" aria-hidden="true"></div>
+              <strong id="viewerPlaceholderTitle">Waiting for the teacher</strong>
+              <span id="viewerPlaceholderText">The shared screen will appear here automatically.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="/vendor/livekit-client.umd.min.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
